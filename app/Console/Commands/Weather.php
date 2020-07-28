@@ -43,7 +43,6 @@ class Weather extends Command
      */
     public function handle()
     {
-       
         $APIkey = "c6f5267ac4eab38fe1709b9d7b862ab5";
         $city = $this->ask("Enter City Name (Use comma for multiple City Weather Forecast)");
         $cityString = explode(",",$city);
@@ -61,7 +60,7 @@ class Weather extends Command
             
                 $table = new Table($this->output);
                 $table->setHeaders([
-                    'Date','temp','Mini Temp','Max Temp'
+                    'Date','Temp','Mini Temp','Max Temp'
                 ]);
                 $separator = new TableSeparator;
                 
@@ -76,9 +75,7 @@ class Weather extends Command
                     $filterData -> $currentDate = [$val];
                     }
                 }
-                
-                $header = ['Date','temp','min','max'];
-                
+
                 foreach ($filterData as $itemdata){
                     $forecastDt = $itemdata[0]['dt_txt'];
                     $this->info($forecastDt);
