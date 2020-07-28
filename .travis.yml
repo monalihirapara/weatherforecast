@@ -1,0 +1,51 @@
+language: php
+
+addons:
+  mariadb: "10.3"
+
+services:
+  - redis
+
+env:
+  matrix:
+    - TRAVIS_NODE_VERSION="10"
+
+matrix:
+  fast_finish: true
+  include:
+    - php: "7.2"
+    - php: "7.3"
+    - php: "7.4"
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+    - node_modules
+    - vendor
+
+notifications:
+  email: false
+
+before_install:
+  - phpenv config-rm xdebug.ini || true
+  - printf "\n" | pecl install -f redis
+  - printf "\n" | pecl install -f memcache
+  - printf "\n" | pecl install -f xdebug
+  - travis_retry composer self-update
+  - mysql -e 'CREATE DATABASE IF NOT EXISTS testing;'
+
+install:
+  - travis_retry composer install --no-interaction --optimize-autoloader --no-suggest
+  - travis_retry npm install --no-optional --no-audit
+  - travis_retry npm run production
+
+before_script:
+  - cp .env.testing .env
+  - php artisan config:clear
+  - php artisan key:generate --force
+  - php artisan config:cache
+
+script:
+  - php artisan migrate:fresh --seed --force
+  - vendor/bin/phpunit --coverage-text
+  - cat .env
